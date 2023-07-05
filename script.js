@@ -74,4 +74,8 @@ function addToProductList(row) {
   backet.append(productNote);
   }
 
+
+
+
+  
 }
