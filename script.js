@@ -1,28 +1,25 @@
+import {insertProductToBasket, getProductFromBasket, deleteProductFromBasket} from './scripts/api.js';
+
 let input = document.querySelector('input');
 let text = document.querySelector('#text');
 const buttonCreate = document.querySelector('.btn_create');
-const closeModal = document.querySelector('.model_close');
-const update = document.querySelector('.btn_update');
 const backet = document.querySelector('.productList');
 const finalPrice = document.querySelector('.final-price');
 
-let test = async function () {
+let getProductFromFacestore = async function () {
   const res = await fetch('https://fakestoreapi.com/products');
-  console.log(3);
   return await res.json();
 };
+
 // document.body.style.opacity = '0';
-let products = await test();
+let products = await getProductFromFacestore();
 document.body.style.opacity = '1';
 
-console.log(products);
-
 products.forEach(element => {
-  myFunction(element.title, element.price, element.id)
+  displayProductTable(element.title, element.price, element.id)
 });
 
-
-function myFunction(value, price, num = false) {
+function displayProductTable(value, price, num = false) {
   let table = document.getElementById("myTableBody");
   let row = table.insertRow(-1);
   let cell1 = row.insertCell(0);
@@ -50,32 +47,56 @@ function myFunction(value, price, num = false) {
     addToProductList(row);
   });
 
-function addToProductList(row) {
-  let productNote = document.createElement('div');
-  productNote.className = 'box is-flex is-justify-content-space-between';
-
-  let text = document.createElement('span');
-  text.className = "has-text-primary";
-
-  let price = document.createElement('span');
-  price.className = "has-text-info";
-
-  text.textContent = 'Product: ' + row.querySelector('.cell-text').textContent;
-  price.textContent = 'Price: ' + row.querySelector('.cell-price').textContent;
- 
-  if (finalPrice.textContent.includes('0$')) {
-    finalPrice.textContent = Number(row.querySelector('.cell-price').textContent);
-  } else {
-    finalPrice.textContent =  (Number(finalPrice.textContent) + Number(row.querySelector('.cell-price').textContent)).toFixed(2);
-    
+  async function addToProductList(row) {
+    let basketElement = {
+      name: row.querySelector('.cell-text').textContent,
+      price: Number(row.querySelector('.cell-price').textContent),
+    };
+    await insertProductToBasket(basketElement);
+    createBasketList();
   }
-
-  productNote.append(text, price);
-  backet.append(productNote);
-  }
-
-
-
-
-  
 }
+
+async function createBasketList() {
+  backet.innerHTML = '';
+  let result = await getProductFromBasket();
+
+  result.forEach(element => {
+    let productNote = document.createElement('div');    
+    productNote.className = 'box is-flex is-justify-content-space-between has-background-link-light';
+
+    let text = document.createElement('span');
+    text.className = "has-text-link-dark";
+
+    let price = document.createElement('span');
+    price.className = "has-text-danger";
+
+    text.textContent = 'Product: ' + element.name;
+    price.textContent = 'Price: ' + element.price;
+
+    if (finalPrice.textContent.includes('0$')) {
+      finalPrice.textContent = Number(element.price);
+    } else {
+      finalPrice.textContent = (Number(finalPrice.textContent) + Number(element.price)).toFixed(2);
+    }
+
+    const buttonDelete = document.createElement('button');
+    buttonDelete.type = 'button';
+    buttonDelete.textContent = 'x';
+    buttonDelete.className = 'btn_delete button is-danger';
+
+    buttonDelete.addEventListener("click", async function () {
+      let id = {
+        id: element.id,
+      };
+
+      await deleteProductFromBasket(id);
+      createBasketList();
+    });
+
+    productNote.append(text, price, buttonDelete);
+    backet.append(productNote);
+  });
+}
+
+createBasketList();
