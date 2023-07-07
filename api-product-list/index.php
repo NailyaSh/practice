@@ -55,6 +55,14 @@ class DB
         $statement->execute();
     }
 
+    public function login($table, $data) 
+    {
+    }
+
+    public function compareToken($table, $id)
+    {
+    }
+
 }
 
 $db = new DB();
@@ -80,6 +88,20 @@ if ($parse['path'] == '/delete' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     $content = trim(file_get_contents("php://input"));
     $decoded = json_decode($content, true);
     $res = $db->delete('basket', $decoded['id']);
+
+    exit();
+}
+
+if ($parse['path'] == '/login' && $_SERVER['REQUEST_METHOD'] == 'POST') {
+    // $res = $db->getAll('basket');
+    echo json_encode($_POST);
+
+    exit();
+}
+
+if ($parse['path'] == '/compare-token') {
+    $res = $db->getAll('basket');
+    echo json_encode($res);
 
     exit();
 }

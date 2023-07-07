@@ -11,7 +11,6 @@ let getProductFromFacestore = async function () {
   return await res.json();
 };
 
-// document.body.style.opacity = '0';
 let products = await getProductFromFacestore();
 document.body.style.opacity = '1';
 
@@ -98,5 +97,18 @@ async function createBasketList() {
     backet.append(productNote);
   });
 }
+
+form.onsubmit = async (e) => {
+  e.preventDefault();
+
+  let response = await fetch('http://api-product-list/login', {
+    method: 'POST',
+    body: new FormData(form)
+  });
+
+  let result = await response.json();
+
+  console.log(result);
+};
 
 createBasketList();
